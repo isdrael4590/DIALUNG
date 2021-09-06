@@ -1,7 +1,7 @@
 # DIALUNG
 ## Software para detección de enfermedades pulmonares
 Plataforma con una estructura para lograr identificar enfermedades pulmonares
-## Lenguaje de programacipon y librerías utilizadas
+## Lenguaje de programación y librerías utilizadas
 - Python 
 ### Librerías Utilizadas
 - Pytorch
