@@ -1,4 +1,3 @@
- 
 # China Set - The Shenzhen set - Chest X-ray Database
 
 Dataset obtenido de la siguiente dirección: [ChinaCXRSet Link](http://openi.nlm.nih.gov/imgs/collections/ChinaSet_AllFiles.zip)
@@ -8,6 +7,9 @@ Dataset obtenido de la siguiente dirección: [ChinaCXRSet Link](http://openi.nlm
 PNG
 ### Resolución
 Aproximadamente 3K x 3K píxeles
+
+### Proyección
+-Desconocido
 
 ## Distribución del dataset
 - 336 casos de pacientes con manifestación de tuberculosis
