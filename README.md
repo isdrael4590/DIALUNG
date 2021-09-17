@@ -17,6 +17,20 @@ Plataforma con una estructura para lograr identificar enfermedades pulmonares
 - Neumonía
 - COVID-19
 
+Label map:
+```python
+labels_map = {
+    0: "normal",
+    1: "tuberculosis",
+    2: "neumonia",
+    3: "covid-19"
+}
+```
+
+## Requerimientos de Software
+- Python3
+Instalar dependencias con `pip install -r requirements.txt`
+
 ## Tareas de la Semana 1 
 - [ ] Descargar el dataset asignado
 - [ ] Programar en el lenguaje que más les convenga un programa para obtener los atributos del dataset, subirlo a Github si es posible
