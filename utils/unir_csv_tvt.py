@@ -28,7 +28,9 @@ def df_archivos_unidos(directorio, array_nombres_archivo):
     for nombre_archivo in array_nombres_archivo:
         ruta_csv = os.path.join(directorio, nombre_archivo)
         df_csv = pd.read_csv(ruta_csv)
-        df_csv.drop([df_csv.columns[0]], axis = 1, inplace = True) #Remover indice
+        nombre_columnas = list(df_csv.columns)
+        if len(nombre_columnas) > 2:
+            df_csv.drop([df_csv.columns[0]], axis = 1, inplace = True) #Remover indice
         nombre_columnas = list(df_csv.columns)
         if nombre_columnas[0] != "image_name" or nombre_columnas[1] != "condition":
             print({nombre_columnas[0]: "image_name", nombre_columnas[1]: "condition"})
