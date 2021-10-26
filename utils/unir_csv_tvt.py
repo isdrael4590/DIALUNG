@@ -27,6 +27,7 @@ def df_archivos_unidos(directorio, array_nombres_archivo):
     df_archivo = pd.DataFrame()
     for nombre_archivo in array_nombres_archivo:
         ruta_csv = os.path.join(directorio, nombre_archivo)
+        print(ruta_csv)
         df_csv = pd.read_csv(ruta_csv)
         nombre_columnas = list(df_csv.columns)
         if len(nombre_columnas) > 2:
@@ -42,9 +43,9 @@ def df_archivos_unidos(directorio, array_nombres_archivo):
 def main():
     args = get_args()
     archivos_carpeta_csv = os.listdir(args.directorio)
-    dataset_train = [archivo for archivo in archivos_carpeta_csv if "train" in archivo]
-    dataset_test = [archivo for archivo in archivos_carpeta_csv if "test" in archivo]
-    dataset_val = [archivo for archivo in archivos_carpeta_csv if "val" in archivo]
+    dataset_train = [archivo for archivo in archivos_carpeta_csv if "train" in archivo.lower()]
+    dataset_test = [archivo for archivo in archivos_carpeta_csv if "test" in archivo.lower()]
+    dataset_val = [archivo for archivo in archivos_carpeta_csv if "val" in archivo.lower()]
 
     df_train = df_archivos_unidos(args.directorio, dataset_train)
     df_test = df_archivos_unidos(args.directorio, dataset_test)
