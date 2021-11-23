@@ -3,10 +3,11 @@ import h5py
 import math
 from torchvision.transforms import Grayscale
 import torch
+import numpy as np
 
 class crearDatasetBinarioDIALUNG(Dataset):
     """
-    Una clase que hereda los clase torch.utils.data.Dataset para crear un objeto que pueda ser 
+    Una clase que hereda los clase torch.utils.data.Dataset para crear un objeto que pueda ser
     manipulado por la clase DataLoader de PyTorch
     ...
 
@@ -55,13 +56,13 @@ class crearDatasetBinarioDIALUNG(Dataset):
         with h5py.File(ruta_archivo_binario, 'r') as archivo:
             name, _ = next(iter(archivo.items()))
             self.tamano_dataset = len(archivo[name])
-            
+
 
     def __len__(self):
         """
         Devuelve
         ----------
-        int 
+        int
             El tamaño del Dataset en entero
         """
         return self.tamano_dataset
@@ -77,26 +78,26 @@ class crearDatasetBinarioDIALUNG(Dataset):
         ----------
         torch.Tensor
             La imagen en formato tensor de PyTorch en Escala de Grises (Tensor[1, alto_imagen, ancho_imagen])
-        int 
+        int
             La etiqueta correspondiente de la imagen
         """
         if self.archivo_binario is None:
             self.archivo_binario = h5py.File(self.ruta_archivo_binario, 'r') #Fuente https://github.com/pytorch/pytorch/issues/11929
             self.imagenes = self.archivo_binario["image"]
             self.condiciones = self.archivo_binario["condition"]
-            
+
         image = self.imagenes[idx]
         image = torch.from_numpy(image) #convertir a TorchTensor
         if not self.rgb:
             image = self.transformacion_gris(image)
-            
+
         if self.debug:
             elementos = torch.numel(image)
             unos = (image >= 204).sum()
             zeros = (image <= 51).sum()
             if (unos/elementos > .8) or (zeros/elementos > .8):
                 print("Elemento desbalanceado en la carga: {}".format(self.archivo_binario["image_path"][idx]))
-        label = self.condiciones[idx]  #Carga la etiqueta 
+        label = self.condiciones[idx].astype(np.int64) #Carga la etiqueta
         image = torch.unsqueeze(image, 3) ## Añade una dimensión al vector 4D
         if self.transform: #Aplico transformacion(es) de la imagen
             image = self.transform(image)
@@ -114,4 +115,4 @@ class crearDatasetBinarioDIALUNG(Dataset):
             zeros = (image <= .2).sum()
             if (unos/elementos > .8) or (zeros/elementos > .8):
                 print("Elemento desbalanceado después de la transformación: {}".format(self.archivo_binario["image_path"][idx]))
-        return image, label 
+        return image, label
