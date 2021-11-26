@@ -156,8 +156,8 @@ class EntrenamientoValidacionDIALUNG:
         print("Tiempo de iteración: {}".format(tiempo_val_epoch))
 
 
-    def guardar_modelo(self, ruta_modelo, ruta_metricas, epoch):
-        self.epocas = epoch
+    def guardar_modelo(self, ruta_modelo, ruta_metricas):
+        self.epocas = len(self.H["val_acc"])
         #Rutas modelos
         ruta_guardar_mejor = os.path.join(ruta_modelo, "mejor.pt")
         ruta_guardar_ultimo = os.path.join(ruta_modelo, "ultimo.pt")
@@ -251,6 +251,6 @@ class EntrenamientoValidacionDIALUNG:
 
     def cargar_anteriores_resultados(self, historico, global_step):
         self.H = historico
-        self.epocas = len(self.H)
+        self.epocas = len(self.H["val_acc"])
         self.entrenamiento_global_step = global_step
         self.mejor_precision = max(historico["val_acc"]) #Cargo la mejor perdida del modelo
