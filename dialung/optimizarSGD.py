@@ -27,8 +27,41 @@ class OptimizarSGDTrainable(tune.Trainable):
         self.modelo = None
         self.scheduler = None
         self.optimizador = None
+        self.inicializar()
 
     def step(self):  # This is called iteratively.
+        done = False
+        self.modelo.train()  # Poner el modelo en modo de entrenamiento
+        totalTrainLoss = 0  # Variable para guardar los datos del loss por iteración
+        trainCorrect = 0  # Variable para almacenar las clasificaciones correctas
+        if self.training_iteration == (self.epocas - 1):
+            done = True
+        iteraciones_dataloader = len(self.dataloader)
+        total_elementos_dataloader = len(self.dataloader.dataset)
+        # Detectar anomalias with torch.autograd.detect_anomaly():
+        for batch, (X, y) in enumerate(self.dataloader):
+            X = X.to(self.dispositivo)
+            y = y.to(self.dispositivo)
+            # Backpropagation
+            self.optimizador.zero_grad()
+            # Computar la predicción y el loss
+            pred = self.modelo(X)
+            loss = self.funcion_perdida(pred, y)
+            loss.backward()
+            # nn.utils.clip_grad_value_(self.modelo.parameters(), clip_value=1.0) #Clipping gradients
+            self.optimizador.step()
+            self.scheduler.step()
+            totalTrainLoss += loss.item()
+            trainCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+        avgTrainLoss = totalTrainLoss / iteraciones_dataloader
+        trainCorrect = trainCorrect / total_elementos_dataloader
+        return {"loss": avgTrainLoss, "accuracy": trainCorrect, "done": done}
+
+    def reset_config(self, new_config):
+        self.inicializar(self)
+        return True
+
+    def inicializar(self):
         pesos_clase_desbalanceada = torch.tensor(
             [0.5097178, 2.12377522, 1.0953478, 1.52830776]
         ).to(self.dispositivo)
@@ -44,36 +77,15 @@ class OptimizarSGDTrainable(tune.Trainable):
             lr=self.lr,
             momentum=self.momentum,
             weight_decay=self.weight_decay,
-            nesterov=self.nesterov,
+            nesterov=self.nesterov
         )
+        max_momentum = self.momentum
+        base_momentum = self.momentum - 0.1
         self.scheduler = OneCycleLR(
             self.optimizador,
             max_lr=self.lr,
             steps_per_epoch=len(self.dataloader),
             epochs=self.epocas,
+            max_momentum = max_momentum,
+            base_momentum = base_momentum
         )
-        self.modelo.train()  # Poner el modelo en modo de entrenamiento
-        totalTrainLoss = 0  # Variable para guardar los datos del loss por iteración
-        trainCorrect = 0  # Variable para almacenar las clasificaciones correctas
-        print(self.training_iteration)
-        iteraciones_dataloader = len(self.dataloader)
-        total_elementos_dataloader = len(self.dataloader.dataset)
-        # Detectar anomalias with torch.autograd.detect_anomaly():
-        for step in range(self.epocas):
-            for batch, (X, y) in enumerate(self.dataloader):
-                X = X.to(self.dispositivo)
-                y = y.to(self.dispositivo)
-                # Backpropagation
-                self.optimizador.zero_grad()
-                # Computar la predicción y el loss
-                pred = self.modelo(X)
-                loss = self.funcion_perdida(pred, y)
-                loss.backward()
-                # nn.utils.clip_grad_value_(self.modelo.parameters(), clip_value=1.0) #Clipping gradients
-                self.optimizador.step()
-                self.scheduler.step()
-                totalTrainLoss += loss.item()
-                trainCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
-            avgTrainLoss = totalTrainLoss / iteraciones_dataloader
-            trainCorrect = trainCorrect / total_elementos_dataloader
-        return {"loss": avgTrainLoss, "accuracy": trainCorrect, "done": True}
