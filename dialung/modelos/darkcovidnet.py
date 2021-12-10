@@ -1,3 +1,4 @@
+from torch import nn 
 class DarkCovidNet(nn.Module):
     """
     Estructura de Red obtenida de https://www.sciencedirect.com/science/article/abs/pii/S0010482520301621
@@ -35,12 +36,12 @@ class DarkCovidNet(nn.Module):
         x = self.max_pool_3(x)
         x = self.triple_conv_2(x) #Cuarta operacion
         x = self.max_pool_4(x)
-        x = self.triple_conv_3(x) #Quinta operación
+        x = self.triple_conv_3(x) #Quinta operaciรณn
         x = self.max_pool_5(x)
-        x = self.triple_conv_4(x) #Sexta operación
-        x = self.DN_3(x) #Septima operación
-        x = self.DN_4(x) #Octava operación
-        x = self.conv(x) #Novena operación
+        x = self.triple_conv_4(x) #Sexta operaciรณn
+        x = self.DN_3(x) #Septima operaciรณn
+        x = self.DN_4(x) #Octava operaciรณn
+        x = self.conv(x) #Novena operaciรณn
         #Inicio del clasificador
         x = self.flatten(x)
         x = self.Linear(x)

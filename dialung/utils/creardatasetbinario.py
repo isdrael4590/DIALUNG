@@ -2,6 +2,7 @@ from torch.utils.data import Dataset
 import h5py
 import math
 from torchvision.transforms import Grayscale
+from torchvision.transforms.functional import adjust_gamma
 import torch
 import numpy as np
 
@@ -27,7 +28,7 @@ class crearDatasetBinarioDIALUNG(Dataset):
     __len__(self)
         Devuelve el tamaño del dataframe
     """
-    def __init__(self, ruta_archivo_binario, transform=None, target_transform=None, rgb = False, debug = False):
+    def __init__(self, ruta_archivo_binario, transform=None, target_transform=None, rgb = False, correccion_gamma = None, debug = False):
         """
         Parámetros
         ----------
@@ -49,6 +50,8 @@ class crearDatasetBinarioDIALUNG(Dataset):
         self.transform = transform
         self.target_transform = target_transform
         self.rgb = rgb
+        #Transformacion adjust_gamma
+        self.correccion_gamma = correccion_gamma
         if not self.rgb:
             self.transformacion_gris = Grayscale(num_output_channels=1)
         self.debug = debug
@@ -105,6 +108,8 @@ class crearDatasetBinarioDIALUNG(Dataset):
             label = self.target_transform(label)
         image = image.squeeze(dim=3) #Volver a formato 3D
         #Verificar por valores ilegales en los datos como nan o inf producto de la transformacion
+        if self.correccion_gamma:
+            image = adjust_gamma(image, gamma = self.correccion_gamma)
         if self.debug:
             if torch.isnan(image).any() or torch.isinf(image).any():
                 print("La imagen: {} contiene valores no válidos".format(self.archivo_binario["image_path"][idx]))
