@@ -3,6 +3,7 @@ import h5py
 import math
 from torchvision.transforms import Grayscale
 from torchvision.transforms.functional import adjust_gamma
+from torchvision.transforms import Normalize
 import torch
 import numpy as np
 
@@ -28,7 +29,8 @@ class crearDatasetBinarioDIALUNG(Dataset):
     __len__(self)
         Devuelve el tamaño del dataframe
     """
-    def __init__(self, ruta_archivo_binario, transform=None, target_transform=None, rgb = False, correccion_gamma = None, debug = False):
+    def __init__(self, ruta_archivo_binario, transform=None, target_transform=None,
+        rgb = False, correccion_gamma = None, normalizacion = None, debug = False):
         """
         Parámetros
         ----------
@@ -40,6 +42,11 @@ class crearDatasetBinarioDIALUNG(Dataset):
             Especifica las transformaciones de la etiqueta y características
         rgb : bool
             Especifica si el modelo de red acepta RGB o solo escala de grises
+        correccion_gamma : float
+            Especifica el nivel de corrección de gamma
+        normalizacion: dict
+            Especifica el diccionario con el key *std* la desviacion estandar y el
+            key *mean* la media de las imagenes
         debug : bool
             Verifica si hay valores invalidos en la imagen, o si es oslo blanca o negra
         """
@@ -52,6 +59,16 @@ class crearDatasetBinarioDIALUNG(Dataset):
         self.rgb = rgb
         #Transformacion adjust_gamma
         self.correccion_gamma = correccion_gamma
+        #Normalizacion
+        if normalizacion:
+            if "mean" in normalizacion and "std" in normalizacion:
+                self.normalizacion = Normalize(mean=normalizacion["mean"],
+                                        std=normalizacion["std"])
+            else:
+                print("Especifique el argumento normalizacion con el siguiente \
+                    formato variable = {\"mean\": 0.5, \"std\": 0.25}" )
+        else:
+            self.normalizacion = None
         if not self.rgb:
             self.transformacion_gris = Grayscale(num_output_channels=1)
         self.debug = debug
@@ -110,6 +127,8 @@ class crearDatasetBinarioDIALUNG(Dataset):
         #Verificar por valores ilegales en los datos como nan o inf producto de la transformacion
         if self.correccion_gamma:
             image = adjust_gamma(image, gamma = self.correccion_gamma)
+        if self.normalizacion:
+            image = self.normalizacion(image)
         if self.debug:
             if torch.isnan(image).any() or torch.isinf(image).any():
                 print("La imagen: {} contiene valores no válidos".format(self.archivo_binario["image_path"][idx]))
